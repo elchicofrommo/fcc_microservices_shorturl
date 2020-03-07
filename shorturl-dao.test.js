@@ -4,6 +4,7 @@ const insertInitialSequence = require("./shorturl-dao.js").insertInitialSequence
 const createShortUrl = require("./shorturl-dao.js").createShortUrl;
 const findShortUrl = require("./shorturl-dao.js").findShortUrl;
 const getShortUrl = require('./shorturl-dao.js').getShortUrl;
+const findOriginalUrl = require('./shorturl-dao.js').findOriginalUrl;
 
 
 const MongodbMemoryServer = require('mongodb-memory-server')
@@ -156,8 +157,37 @@ test('testing bad input http://www.nowherethatisreal.com into getShortUrl', asyn
 	}
 })
 
+test("finding original urls by already created short_url", async() => {
+	try{
+		var originalUrl = await findOriginalUrl(5);
+		console.log("finding by short id: " + originalUrl);
+		expect(originalUrl).toHaveProperty("original_url");
+		expect(originalUrl.original_url).toEqual("http://www.google.com");
+		originalUrl = await findOriginalUrl(6);
+		expect(originalUrl).toHaveProperty("original_url");
+		console.log("finding by short id: " + originalUrl);
+		expect(originalUrl.original_url).toEqual("http://www.nytimes.com");
+		originalUrl = await findOriginalUrl(7);
+		expect(originalUrl).toHaveProperty("original_url");
+		console.log("finding by short id: " + originalUrl);
+		expect(originalUrl.original_url).toEqual("https://www.freecodecamp.org");
+	}catch(err){
+		expect(err).toBeFalsy();
+	}
+})
 
-		
+test("searching for origianl url by a short that doesn't exist", async()=>{
+	try{
+		var error = await findOriginalUrl(99);
+		expect(error).toEqual({"error":"No short url found for given input"});
+
+		error = await findOriginalUrl(101);
+		expect(error).toEqual({"error":"No short url found for given input"});
+	}catch(err){
+		console.log("test error " + err)
+		expect(err).toBeFalsy()
+	}
+})
 
 /*
 test("insertIntoSequence", done => {

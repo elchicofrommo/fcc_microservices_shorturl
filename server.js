@@ -54,7 +54,7 @@ app.get("/api/hello", function (req, res) {
 
 const getCurrentSequenceValue = require("./shorturl-dao.js").getCurrentSequenceValue;
 const getShortUrl = require("./shorturl-dao.js").getShortUrl;
-
+const findOriginalUrl = require('./shorturl-dao.js').findOriginalUrl;
 
 app.post("/api/shorturl/new", function(req, res){
 
@@ -67,6 +67,24 @@ app.post("/api/shorturl/new", function(req, res){
 		res.send(result);
 	})
 
+})
+
+app.get("/api/shorturl/:short_url", function(req, res){
+	let short_url = req.params.short_url;
+
+	findOriginalUrl(short_url).then( (result) => {
+
+		console.log("result is : " + JSON.stringify(result));
+		if(result.original_url){
+			console.log("found original url: " + result)
+			res.redirect(302, result.original_url);
+		}
+		else{
+			console.log("could not find original_url property " + result);
+			res.send(result);
+		}
+		
+	})
 })
 
 

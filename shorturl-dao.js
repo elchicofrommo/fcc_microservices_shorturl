@@ -65,6 +65,18 @@ var findShortUrl = async function(url){
 	return  toReturn
 }
 
+var findOriginalUrl = async function(short_url){
+	try{
+		let toReturn = await ShortURL.findOne({short_url: short_url}).select('original_url -_id');
+		if(!toReturn)
+			toReturn = {"error":"No short url found for given input"};
+		return toReturn;
+	}catch(err){
+		console.log('failed to find original url for short_url ' + short_url);
+		return {"error":"No short url found for given input"};
+	}
+}
+
 var getShortUrl = async function(url){
 
 	// first see if the url exists
@@ -115,3 +127,4 @@ exports.insertInitialSequence = insertInitialSequence;
 exports.createShortUrl = createShortUrl;
 exports.findShortUrl = findShortUrl;
 exports.getShortUrl = getShortUrl;
+exports.findOriginalUrl = findOriginalUrl;
