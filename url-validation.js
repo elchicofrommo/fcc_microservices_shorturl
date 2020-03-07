@@ -1,31 +1,42 @@
 
 
 const dns = require('dns');
-const http = require('http');
-const https = require('https');
+
 
 function validateURL(url, done){
 
-	let request = http;
+	let myUrl;
 	if(url && typeof url == "string"){
-		url = url.toLowerCase();
-		if(url.startsWith("https"))
-			request = https;
+		myUrl = url.toLowerCase();
+		if(url.startsWith("https")){
+			myUrl = url.substring(8);
+		}else{
+			myUrl = url.substring(7);
+		}
+		myUrl = myUrl.split('/')[0];
+	}
+
+	if(myUrl==""){
+		done(null, false);
+		return;
 	}
 	try{
-		request.get(url, (res)=> {
-			const { statusCode } = res;
+		console.log("step 1 " + myUrl);
+		dns.lookup(myUrl, (err, address, family)=> {
+			console.log("step 2");
+
 
 			let bReturn = true;
-			if(statusCode !== 200){
+			if(err){
 				bReturn = false;
-			//	console.log("found a problem with the url statusCode=" + statusCode);
+				console.log("found a problem with the url " + err);
 			}
-			done(statusCode, bReturn);
+			done(err, bReturn);
 
 		})
+		console.log("step 3");
 	}catch(err){
-	//	console.log("caught exceptoin in url validation " + err);
+		console.log("caught exceptoin in url validation " + err);
 		done(err, false)
 	}
 }

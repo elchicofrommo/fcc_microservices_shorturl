@@ -10,6 +10,15 @@ var app = express();
 app.use(express.json()) // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: false })) // for parsing application/x-www-form-urlencoded
 
+
+
+console.log(`Connecting DB to ${process.env.DATABASE_URI}` )
+mongoose.connect(process.env.DATABASE_URI, { 
+	useNewUrlParser: true, 
+	useUnifiedTopology: true 
+}); 
+
+
 function simpleRequestLogger(req, resp, next){
 	var time = (new Date()).toUTCString();
   console.log(`[${time}] req.method='${req.method}' req.path='${req.path}' req.ip='${req.ip}'`);
@@ -43,10 +52,29 @@ app.get("/api/hello", function (req, res) {
 });
 
 
+const getCurrentSequenceValue = require("./shorturl-dao.js").getCurrentSequenceValue;
+const getShortUrl = require("./shorturl-dao.js").getShortUrl;
+
 
 app.post("/api/shorturl/new", function(req, res){
-	console.log("observed a post");
-	res.send(req.body);
+
+	if(!req.body && !req.body.url){
+		res.send({error: "invalid URL"})
+		return;
+	}
+
+	getShortUrl(req.body.url).then((result)=>{
+		res.send(result);
+	})
+
+})
+
+
+app.get("/checkConnection", function(req, res){
+	getCurrentSequenceValue((err, data)=>{
+		console.log(`got data back ${err} ${data}`)
+		res.send(data);
+	});
 })
 
 // listen for requests :)
